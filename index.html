@@ -227,6 +227,46 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
 .goal-field{flex:1;height:40px;background:var(--surface2);border:var(--border-card);border-radius:8px;padding:0 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;}
 .goal-add-btn{height:40px;padding:0 14px;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);border-radius:8px;color:var(--gold-light);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
 
+
+/* CALENDAR */
+.cal-view-btn{font-size:12px;padding:5px 12px;border-radius:8px;cursor:pointer;font-weight:500;color:var(--text3);border:1px solid var(--surface2);transition:all 0.2s;}
+.cal-view-btn.active-view{background:var(--gold-dim);border-color:rgba(201,168,76,0.4);color:var(--gold-light);}
+.cal-month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;width:100%;margin-bottom:16px;}
+.cal-day-header{text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:8px 0;letter-spacing:0.06em;}
+.cal-day-cell{min-height:60px;background:var(--surface);border-radius:8px;padding:4px;border:1px solid var(--surface2);cursor:pointer;transition:all 0.2s;position:relative;}
+.cal-day-cell:hover{border-color:rgba(201,168,76,0.3);}
+.cal-day-cell.today{border-color:var(--gold);box-shadow:var(--glow);}
+.cal-day-cell.other-month{opacity:0.35;}
+.cal-day-num{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:2px;}
+.cal-day-cell.today .cal-day-num{color:var(--gold-light);font-weight:700;}
+.cal-dot{width:6px;height:6px;border-radius:50%;margin:1px auto;}
+.cal-dot.gold{background:var(--gold);}
+.cal-dot.purple{background:#818CF8;}
+.cal-dot.gray{background:#6B7A8D;}
+.cal-week-row{width:100%;margin-bottom:8px;}
+.cal-week-time{width:52px;font-size:11px;color:var(--text3);padding-top:4px;flex-shrink:0;font-weight:400;}
+.cal-week-col{flex:1;}
+.cal-week-header{display:flex;margin-bottom:8px;padding-left:52px;gap:4px;}
+.cal-week-day-label{flex:1;text-align:center;font-size:12px;font-weight:600;color:var(--text3);padding:4px 0;}
+.cal-week-day-label.today-label{color:var(--gold-light);}
+.cal-time-row{display:flex;gap:4px;min-height:48px;border-top:1px solid var(--surface2);align-items:flex-start;padding-top:4px;}
+.cal-event{border-radius:6px;padding:3px 6px;font-size:11px;font-weight:500;margin-bottom:2px;cursor:pointer;transition:all 0.2s;line-height:1.3;}
+.cal-event.gold{background:var(--gold-dim);color:var(--gold-light);border:1px solid rgba(201,168,76,0.3);}
+.cal-event.purple{background:rgba(129,140,248,0.15);color:#818CF8;border:1px solid rgba(129,140,248,0.3);}
+.cal-event.gray{background:var(--surface2);color:var(--text2);border:1px solid var(--surface2);}
+.cal-day-view{width:100%;}
+.cal-day-slot{display:flex;gap:12px;min-height:56px;border-top:1px solid var(--surface2);padding-top:6px;padding-bottom:6px;}
+.cal-day-time{width:56px;font-size:12px;color:var(--text3);padding-top:2px;flex-shrink:0;}
+.cal-day-events{flex:1;display:flex;flex-direction:column;gap:4px;}
+.cal-event-detail{background:var(--surface);border-radius:10px;padding:10px 14px;margin-bottom:8px;border:var(--border-card);box-shadow:var(--glow);cursor:pointer;}
+.cal-event-detail:hover{box-shadow:var(--glow-focus);}
+.cal-event-time{font-size:12px;color:var(--text3);font-weight:400;margin-bottom:4px;}
+.cal-event-title{font-size:15px;color:var(--text);font-weight:500;}
+.cal-event-tag{font-size:10px;padding:2px 8px;border-radius:10px;margin-top:4px;display:inline-block;font-weight:500;}
+.cal-phone-btn{font-size:11px;color:var(--text3);margin-top:6px;cursor:pointer;font-weight:500;}
+.cal-phone-btn:hover{color:var(--gold-light);}
+.cal-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;font-weight:400;line-height:1.7;}
+
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fadein{animation:fadeUp 0.35s ease forwards;}
 </style>
@@ -397,7 +437,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
   </div>
   <div class="action-row">
     <button class="sec-btn" onclick="newDump()">New dump</button>
-    <button class="cal-btn" onclick="exportCal()">📅 Add to calendar</button>
+    <button class="cal-btn" onclick="exportCal()">📱 Add to phone calendar</button>
   </div>
 </div>
 
@@ -417,6 +457,19 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
     <div class="header-action" id="historyCount"></div>
   </div>
   <div id="historyList" style="width:100%;"></div>
+</div>
+
+<!-- CALENDAR SCREEN -->
+<div class="screen" id="calScreen">
+  <div class="screen-header">
+    <div class="screen-title">Calendar</div>
+    <div style="display:flex;gap:8px;">
+      <div class="cal-view-btn active-view" id="view-month" onclick="setView('month')">Month</div>
+      <div class="cal-view-btn" id="view-week" onclick="setView('week')">Week</div>
+      <div class="cal-view-btn" id="view-day" onclick="setView('day')">Day</div>
+    </div>
+  </div>
+  <div id="calGrid" style="width:100%;"></div>
 </div>
 
 <!-- SETTINGS SCREEN -->
@@ -466,6 +519,9 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
   </div>
   <div class="nav-item" id="nav-tasks" onclick="switchTab('tasksScreen','nav-tasks')">
     <div class="nav-icon">✅</div><div class="nav-label">Tasks</div>
+  </div>
+  <div class="nav-item" id="nav-cal" onclick="switchTab('calScreen','nav-cal')">
+    <div class="nav-icon">📅</div><div class="nav-label">Calendar</div>
   </div>
   <div class="nav-item" id="nav-history" onclick="switchTab('historyScreen','nav-history')">
     <div class="nav-icon">📖</div><div class="nav-label">History</div>
@@ -903,6 +959,7 @@ function switchTab(screenId,navId){
   if(screenId==='tasksScreen')renderTasks();
   if(screenId==='historyScreen')renderHistory();
   if(screenId==='settingsScreen')renderGoals();
+  if(screenId==='calScreen'){calDate=new Date();renderCal();}
 }
 
 function applyTheme(){
@@ -916,6 +973,186 @@ function toggleTheme(){
   isLight=!isLight;
   applyTheme();
   sv('selah_theme',isLight?'light':'dark');
+}
+
+
+// CALENDAR
+let calView='month';
+let calDate=new Date();
+let calEvents=[];
+
+function setView(v){
+  calView=v;
+  document.querySelectorAll('.cal-view-btn').forEach(b=>b.classList.remove('active-view'));
+  document.getElementById('view-'+v).classList.add('active-view');
+  renderCal();
+}
+
+function buildCalEvents(){
+  calEvents=[];
+  const todayKey=getDayKey(0);
+  const tomorrowKey=getDayKey(1);
+  // From tasks
+  tasks.forEach(t=>{
+    const dateKey=t.bucket==='today'?todayKey:t.bucket==='tomorrow'?tomorrowKey:t.dateKey||todayKey;
+    calEvents.push({title:t.text,dateKey,type:'task',color:t.starred?'gold':'gray',done:t.done});
+  });
+  // From last result timeBlocks
+  if(lastResult?.timeBlocks){
+    lastResult.timeBlocks.forEach(b=>{
+      calEvents.push({title:b.task,dateKey:todayKey,time:b.time,type:'timeblock',color:'gold'});
+    });
+  }
+  if(lastResult?.tomorrow){
+    lastResult.tomorrow.forEach(t=>{
+      calEvents.push({title:t,dateKey:tomorrowKey,type:'tomorrow',color:'purple'});
+    });
+  }
+}
+
+function renderCal(){
+  buildCalEvents();
+  const grid=document.getElementById('calGrid');
+  if(calView==='month')renderMonth(grid);
+  else if(calView==='week')renderWeek(grid);
+  else renderDay(grid);
+}
+
+function renderMonth(grid){
+  const year=calDate.getFullYear(),month=calDate.getMonth();
+  const first=new Date(year,month,1);
+  const last=new Date(year,month+1,0);
+  const startDay=first.getDay();
+  const today=new Date();
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div onclick="calNav(-1)" style="font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;">‹</div>
+    <div style="font-size:16px;font-weight:500;color:var(--text);">${months[month]} ${year}</div>
+    <div onclick="calNav(1)" style="font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;">›</div>
+  </div>
+  <div class="cal-month-grid">
+    <div class="cal-day-header">SUN</div><div class="cal-day-header">MON</div><div class="cal-day-header">TUE</div>
+    <div class="cal-day-header">WED</div><div class="cal-day-header">THU</div><div class="cal-day-header">FRI</div>
+    <div class="cal-day-header">SAT</div>`;
+  for(let i=0;i<startDay;i++)html+=`<div class="cal-day-cell other-month"></div>`;
+  for(let d=1;d<=last.getDate();d++){
+    const dateKey=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
+    const dayEvents=calEvents.filter(e=>e.dateKey===dateKey&&!e.done);
+    html+=`<div class="cal-day-cell${isToday?' today':''}" onclick="goToDay('${dateKey}')">
+      <div class="cal-day-num">${d}</div>
+      ${dayEvents.slice(0,3).map(e=>`<div class="cal-dot ${e.color}"></div>`).join('')}
+    </div>`;
+  }
+  html+=`</div>`;
+  grid.innerHTML=html;
+}
+
+function renderWeek(grid){
+  const today=new Date();
+  const startOfWeek=new Date(calDate);
+  startOfWeek.setDate(calDate.getDate()-calDate.getDay());
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  let headers=`<div class="cal-week-header">`;
+  for(let i=0;i<7;i++){
+    const d=new Date(startOfWeek);d.setDate(startOfWeek.getDate()+i);
+    const isToday=d.toDateString()===today.toDateString();
+    const key=d.toISOString().split('T')[0];
+    headers+=`<div class="cal-week-day-label${isToday?' today-label':''}" onclick="goToDay('${key}')">${days[i]}<br>${d.getDate()}</div>`;
+  }
+  headers+=`</div>`;
+  const hours=[8,9,10,11,12,13,14,15,16,17,18,19,20];
+  let rows=``;
+  hours.forEach(h=>{
+    const label=h===12?'12pm':h<12?`${h}am`:`${h-12}pm`;
+    let cols=``;
+    for(let i=0;i<7;i++){
+      const d=new Date(startOfWeek);d.setDate(startOfWeek.getDate()+i);
+      const key=d.toISOString().split('T')[0];
+      const evs=calEvents.filter(e=>e.dateKey===key&&e.time&&parseInt(e.time)===h&&!e.done);
+      cols+=`<div class="cal-week-col">${evs.map(e=>`<div class="cal-event ${e.color}">${e.title.substring(0,20)}</div>`).join('')}</div>`;
+    }
+    rows+=`<div class="cal-time-row"><div class="cal-week-time">${label}</div>${cols}</div>`;
+  });
+  grid.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div onclick="calNavWeek(-1)" style="font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;">‹</div>
+    <div style="font-size:14px;font-weight:500;color:var(--text);">${months[startOfWeek.getMonth()]} ${startOfWeek.getDate()} – ${months[new Date(startOfWeek.getTime()+6*86400000).getMonth()]} ${new Date(startOfWeek.getTime()+6*86400000).getDate()}</div>
+    <div onclick="calNavWeek(1)" style="font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;">›</div>
+  </div>${headers}${rows}`;
+}
+
+function renderDay(grid){
+  const today=new Date();
+  const key=calDate.toISOString().split('T')[0];
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const isToday=calDate.toDateString()===today.toDateString();
+  const dayEvents=calEvents.filter(e=>e.dateKey===key&&!e.done);
+  const hours=[7,8,9,10,11,12,13,14,15,16,17,18,19,20,21];
+  let slots=``;
+  hours.forEach(h=>{
+    const label=h===12?'12:00 PM':h<12?`${h}:00 AM`:`${h-12}:00 PM`;
+    const evs=dayEvents.filter(e=>e.time&&parseInt(e.time.split(':')[0]+(e.time.includes('PM')&&parseInt(e.time.split(':')[0])<12?12:0))===h);
+    slots+=`<div class="cal-day-slot">
+      <div class="cal-day-time">${label}</div>
+      <div class="cal-day-events">${evs.map(e=>`
+        <div class="cal-event-detail">
+          ${e.time?`<div class="cal-event-time">${e.time}</div>`:''}
+          <div class="cal-event-title">${e.title}</div>
+          <div class="cal-event-tag ${e.color==='gold'?'tag-a':e.color==='purple'?'':'tag-f'}">${e.type==='timeblock'?e.type:'task'}</div>
+          <div class="cal-phone-btn" onclick="exportSingleEvent('${e.title.replace(/'/g,"\'")}','${e.time||''}','${key}')">📱 Add to phone calendar</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  });
+  const noTimed=dayEvents.filter(e=>!e.time);
+  let untimed=noTimed.length?`<div style="margin-bottom:16px;"><div class="section-label label-gold" style="margin-bottom:8px;">All day / no time set</div>${noTimed.map(e=>`<div class="cal-event-detail"><div class="cal-event-title">${e.title}</div><div class="cal-phone-btn" onclick="exportSingleEvent('${e.title.replace(/'/g,"\'")}','','${key}')">📱 Add to phone calendar</div></div>`).join('')}</div>`:'';
+  grid.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div onclick="calNavDay(-1)" style="font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;">‹</div>
+    <div style="font-size:15px;font-weight:500;color:${isToday?'var(--gold-light)':'var(--text)'};">${days[calDate.getDay()]}, ${months[calDate.getMonth()]} ${calDate.getDate()}</div>
+    <div onclick="calNavDay(1)" style="font-size:20px;cursor:pointer;color:var(--text2);padding:4px 8px;">›</div>
+  </div>${untimed}${dayEvents.length===0&&!noTimed.length?`<div class="cal-empty">Nothing scheduled here yet.<br>Do a brain dump and items will appear.</div>`:''}${slots}`;
+}
+
+function goToDay(dateKey){
+  calDate=new Date(dateKey+'T12:00:00');
+  setView('day');
+}
+
+function calNav(dir){
+  calDate=new Date(calDate.getFullYear(),calDate.getMonth()+dir,1);
+  renderCal();
+}
+function calNavWeek(dir){
+  calDate.setDate(calDate.getDate()+dir*7);
+  renderCal();
+}
+function calNavDay(dir){
+  calDate.setDate(calDate.getDate()+dir);
+  renderCal();
+}
+
+function exportSingleEvent(title,time,dateKey){
+  const ds=dateKey.replace(/-/g,'');
+  const toT=s=>{if(!s)return ds+'T090000';const isPM=s.includes('PM');const nums=s.replace(/[^0-9:]/g,'');const[h,m]=nums.split(':');let hh=parseInt(h);if(isPM&&hh<12)hh+=12;if(!isPM&&hh===12)hh=0;return ds+'T'+String(hh).padStart(2,'0')+(m||'00')+'00';};
+  const start=toT(time);
+  const endH=parseInt(start.substring(9,11))+1;
+  const end=start.substring(0,9)+String(endH).padStart(2,'0')+start.substring(11);
+  const ics=`BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Selah//EN
+BEGIN:VEVENT
+SUMMARY:${title}
+DTSTART:${start}
+DTEND:${end}
+DESCRIPTION:From Selah
+END:VEVENT
+END:VCALENDAR`;
+  const blob=new Blob([ics],{type:'text/calendar'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='selah-event.ics';a.click();
+  URL.revokeObjectURL(url);
 }
 
 init();
