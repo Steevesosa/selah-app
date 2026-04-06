@@ -92,7 +92,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
 .nav-item:hover{background:var(--surface2);}
 .nav-item.active-nav{background:var(--gold-dim);border-color:rgba(201,168,76,0.3);box-shadow:var(--glow);}
 .light .nav-item.active-nav{background:rgba(49,130,206,0.08);border-color:rgba(49,130,206,0.3);}
-.nav-icon{font-size:18px;color:var(--text3);transition:color 0.2s;}
+.nav-icon{display:flex;align-items:center;justify-content:center;color:var(--text3);transition:color 0.2s;}
 .nav-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:color 0.2s;}
 .nav-item.active-nav .nav-icon,.nav-item.active-nav .nav-label{color:var(--gold-light);}
 .light .nav-item.active-nav .nav-icon,.light .nav-item.active-nav .nav-label{color:#3182CE;}
@@ -265,6 +265,13 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
 .cal-event-tag{font-size:10px;padding:2px 8px;border-radius:10px;margin-top:4px;display:inline-block;font-weight:500;}
 .cal-phone-btn{font-size:11px;color:var(--text3);margin-top:6px;cursor:pointer;font-weight:500;}
 .cal-phone-btn:hover{color:var(--gold-light);}
+
+/* THEME COLOR PICKER */
+.color-picker-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.color-swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all 0.2s;flex-shrink:0;}
+.color-swatch.active{border-color:var(--text);transform:scale(1.15);}
+.color-picker-input{width:40px;height:40px;border-radius:50%;border:none;cursor:pointer;background:transparent;padding:0;}
+
 .cal-empty{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px;font-weight:400;line-height:1.7;}
 
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
@@ -272,6 +279,32 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
 </style>
 </head>
 <body>
+
+<!-- MOOD CHECK -->
+<div class="overlay" id="moodOverlay" style="display:none;">
+  <div class="popup" style="text-align:center;max-width:340px;">
+    <div class="popup-title" style="margin-bottom:6px;">How are you doing?</div>
+    <div class="popup-sub">This helps Selah adjust your plan</div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px;">
+      <button class="popup-btn" style="background:var(--gold-dim);color:var(--gold-light);border:1px solid rgba(201,168,76,0.3);box-shadow:none;" onclick="setMood('good')">😊 I am good, let's go</button>
+      <button class="popup-btn" style="background:rgba(129,140,248,0.1);color:#818CF8;border:1px solid rgba(129,140,248,0.3);box-shadow:none;" onclick="setMood('rough')">😐 It is a bit rough</button>
+      <button class="popup-btn" style="background:rgba(239,68,68,0.08);color:#EF4444;border:1px solid rgba(239,68,68,0.2);box-shadow:none;margin-top:0;" onclick="setMood('overwhelmed')">😔 I am overwhelmed</button>
+    </div>
+    <div class="popup-skip" onclick="setMood('skip')">Skip for now</div>
+  </div>
+</div>
+
+<!-- QUICK DUMP -->
+<div class="overlay" id="quickDumpOverlay" style="display:none;">
+  <div class="popup" style="max-width:360px;">
+    <div class="popup-title">Quick capture</div>
+    <div class="popup-sub">We will sort this in the morning</div>
+    <div style="font-size:14px;color:var(--text2);font-weight:400;line-height:1.6;margin-bottom:16px;">It is late. Just dump what is on your mind and Selah will organize it when you come back.</div>
+    <textarea id="quickDumpBox" class="dump" style="min-height:140px;" placeholder="Just say what is on your mind..."></textarea>
+    <button class="popup-btn" onclick="saveQuickDump()">Save and rest</button>
+    <div class="popup-skip" onclick="document.getElementById('quickDumpOverlay').style.display='none'">Never mind</div>
+  </div>
+</div>
 
 <!-- WELCOME -->
 <div class="overlay" id="welcomeOverlay" style="display:none;">
@@ -397,7 +430,13 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
     </div>
   </div>
   <textarea class="dump" id="dumpBox" placeholder="What's on your mind?"></textarea>
-  <div class="voice-hint">🎙 Tip: tap the mic on your keyboard and just talk</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px;">
+  <button id="voiceBtn" onclick="toggleVoice()" style="display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:24px;border:1.5px solid var(--surface2);background:var(--surface);color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.2s;box-shadow:var(--glow);">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+    <span id="voiceBtnLabel">Hold to talk</span>
+  </button>
+  <div style="font-size:12px;color:var(--text3);">or tap mic on keyboard</div>
+</div>
   <div class="btn-row">
     <button class="main-btn" id="mainBtn" onclick="processInput()">Clear my mind</button>
     <button class="guide-btn" onclick="document.getElementById('guideOverlay').style.display='flex'">How to use this better</button>
@@ -414,6 +453,9 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
       <span>Selah</span>
     </div>
     <div style="font-size:13px;color:var(--text3);font-weight:400;" id="outDate"></div>
+  </div>
+  <div id="selahMessageCard" class="card fadein" style="background:var(--gold-dim);border-color:rgba(201,168,76,0.2);margin-bottom:14px;">
+    <div id="selahMessage" style="font-size:15px;color:var(--gold-light);font-weight:400;line-height:1.6;font-style:italic;"></div>
   </div>
   <div class="card fadein">
     <div class="out-label">Start here</div>
@@ -438,6 +480,25 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
   <div class="action-row">
     <button class="sec-btn" onclick="newDump()">New dump</button>
     <button class="cal-btn" onclick="exportCal()">📱 Add to phone calendar</button>
+  </div>
+  <button onclick="shareOutput()" style="width:100%;height:44px;margin-top:10px;background:transparent;border:1.5px solid var(--surface2);border-radius:12px;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;box-shadow:var(--glow);">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:6px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    Share my plan
+  </button>
+  <div id="goalsOutputSection" style="display:none;width:100%;margin-top:14px;">
+    <div style="background:var(--surface);border-radius:var(--radius);padding:16px 18px;border:var(--border-card);box-shadow:var(--glow);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="out-label" style="margin-bottom:0;">Your bigger picture</div>
+        <div style="font-size:11px;color:var(--text3);cursor:pointer;" onclick="document.getElementById('goalsOutputSection').style.display='none'">hide</div>
+      </div>
+      <div id="goalsOutputList"></div>
+    </div>
+  </div>
+  <div id="patternsSection" style="display:none;width:100%;margin-top:10px;">
+    <div style="background:var(--surface);border-radius:var(--radius);padding:16px 18px;border:var(--border-card);box-shadow:var(--glow);">
+      <div class="out-label" style="margin-bottom:10px;">Patterns Selah noticed</div>
+      <div id="patternsList" style="font-size:14px;color:var(--text2);font-weight:400;line-height:1.9;"></div>
+    </div>
   </div>
 </div>
 
@@ -484,6 +545,20 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
   <div class="card">
     <div class="out-label">Display</div>
     <div class="notif-row"><div><div class="notif-label">Theme</div><div class="notif-sub" id="themeLabel">Dark mode</div></div><button class="toggle" id="themeToggle" onclick="toggleTheme()"></button></div>
+    <div style="margin-top:14px;">
+      <div class="notif-label" style="margin-bottom:4px;">Accent color</div>
+      <div class="notif-sub" style="margin-bottom:10px;">Pick any color to make Selah yours</div>
+      <div class="color-picker-row">
+        <div class="color-swatch active" id="sw-gold" style="background:#C9A84C;" onclick="setAccent('#C9A84C','sw-gold')"></div>
+        <div class="color-swatch" id="sw-pink" style="background:#E879A0;" onclick="setAccent('#E879A0','sw-pink')"></div>
+        <div class="color-swatch" id="sw-blue" style="background:#60A5FA;" onclick="setAccent('#60A5FA','sw-blue')"></div>
+        <div class="color-swatch" id="sw-green" style="background:#4ADE80;" onclick="setAccent('#4ADE80','sw-green')"></div>
+        <div class="color-swatch" id="sw-purple" style="background:#A78BFA;" onclick="setAccent('#A78BFA','sw-purple')"></div>
+        <div class="color-swatch" id="sw-coral" style="background:#FB7185;" onclick="setAccent('#FB7185','sw-coral')"></div>
+        <div class="color-swatch" id="sw-mint" style="background:#2DD4BF;" onclick="setAccent('#2DD4BF','sw-mint')"></div>
+        <input type="color" class="color-picker-input color-swatch" id="customColorPicker" value="#C9A84C" title="Pick any color" onchange="setAccent(this.value,'custom')" style="width:32px;height:32px;border-radius:50%;cursor:pointer;border:2px dashed var(--text3);"/>
+      </div>
+    </div>
   </div>
   <div class="card">
     <div class="out-label">Account</div>
@@ -499,8 +574,8 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
     </div>
   </div>
   <div class="card">
-    <div class="out-label">Data</div>
-    <div style="font-size:15px;color:var(--text2);font-weight:400;line-height:1.7;margin-bottom:14px;">Your data stays on your device and is never shared.</div>
+    <div class="out-label">Data &amp; Privacy</div>
+    <div style="font-size:15px;color:var(--text2);font-weight:400;line-height:1.7;margin-bottom:14px;">Your data never leaves your device except to process your brain dump. We do not store it, sell it, or share it. Ever.</div>
     <button class="sec-btn" style="width:100%;height:44px;font-size:14px;margin-bottom:10px;" onclick="downloadEntries()">Download my entries</button>
     <button class="sec-btn" style="width:100%;height:44px;font-size:14px;color:#EF4444;border-color:rgba(239,68,68,0.4);" onclick="clearAllData()">Clear all data</button>
   </div>
@@ -515,19 +590,19 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--text);min
 
 <nav class="bottom-nav">
   <div class="nav-item active-nav" id="nav-dump" onclick="switchTab('dumpScreen','nav-dump')">
-    <div class="nav-icon">✏️</div><div class="nav-label">Dump</div>
+    <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div class="nav-label">Dump</div>
   </div>
   <div class="nav-item" id="nav-tasks" onclick="switchTab('tasksScreen','nav-tasks')">
-    <div class="nav-icon">✅</div><div class="nav-label">Tasks</div>
+    <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></div><div class="nav-label">Tasks</div>
   </div>
   <div class="nav-item" id="nav-cal" onclick="switchTab('calScreen','nav-cal')">
-    <div class="nav-icon">📅</div><div class="nav-label">Calendar</div>
+    <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="nav-label">Calendar</div>
   </div>
   <div class="nav-item" id="nav-history" onclick="switchTab('historyScreen','nav-history')">
-    <div class="nav-icon">📖</div><div class="nav-label">History</div>
+    <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="nav-label">History</div>
   </div>
   <div class="nav-item" id="nav-settings" onclick="switchTab('settingsScreen','nav-settings')">
-    <div class="nav-icon">⚙️</div><div class="nav-label">Settings</div>
+    <div class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div><div class="nav-label">Settings</div>
   </div>
 </nav>
 
@@ -565,7 +640,19 @@ function finishInit(name,bday){
   loadCarryover();
   document.getElementById('settingsName').textContent=name;
   renderGoals();
-  if(!ld('selah_skip_onboard'))document.getElementById('onboarding').style.display='flex';
+  applyAccent(ld('selah_accent','#C9A84C'));
+  if(!ld('selah_skip_onboard')){
+    document.getElementById('onboarding').style.display='flex';
+  } else {
+    checkMood();
+  }
+  if(!ld('selah_first_done')){
+    const box=document.getElementById('dumpBox');
+    box.value="I need to reply to a few emails, the dishes have been piling up, I want to go to the gym today but I always push it off, I have a work deadline on Friday I have not started, and maybe call mom this week";
+    box.style.color='var(--text3)';
+    box.addEventListener('focus',()=>{if(!ld('selah_first_done')){box.value='';box.style.color='var(--text)';}},{once:true});
+    sv('selah_first_done',true);
+  }
 }
 
 function saveWelcome(){
@@ -590,7 +677,29 @@ function setGreeting(name){
   const h=new Date().getHours();
   let g=h<12?`Good morning, ${name}.`:h<17?`Good afternoon, ${name}.`:`Good evening, ${name}.`;
   document.getElementById('greetingText').textContent=g;
-  document.getElementById('greetingSub').textContent="What's on your mind?";
+  const streak=calcStreak();
+  const streakText=streak>1?`Day ${streak} of showing up. `:'';
+  document.getElementById('greetingSub').textContent=streakText+"What's on your mind?";
+  if(h>=22||h<5){
+    setTimeout(()=>{
+      if(!ld('selah_quick_shown_today')){
+        sv('selah_quick_shown_today',getDayKey(0));
+        document.getElementById('quickDumpOverlay').style.display='flex';
+      }
+    },3000);
+  }
+}
+
+function calcStreak(){
+  let streak=0;
+  let d=new Date();
+  for(let i=0;i<90;i++){
+    const key=d.toISOString().split('T')[0];
+    if(entries.find(e=>e.date===key))streak++;
+    else break;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
 }
 
 function checkBirthday(name,bday){
@@ -606,6 +715,7 @@ function checkBirthday(name,bday){
 function closeOnboarding(skip){
   document.getElementById('onboarding').style.display='none';
   if(skip)sv('selah_skip_onboard',true);
+  checkMood();
 }
 
 function getDayKey(offsetDays=0){
@@ -662,13 +772,15 @@ async function processInput(){
   go('loadScreen');
   const iv=setInterval(()=>{mi=(mi+1)%LOADS.length;lt.textContent=LOADS[mi];},800);
   const workNote=chips.includes('Working')?'User is working today until around 5pm.':chips.includes('Personal')?'User is NOT working today.':chips.includes('Half')?'User is working a half day.':'User did not specify work status.';
-  const overNote=chips.includes('overwhelmed')?'User is overwhelmed. Be gentle, do not overload the day.':'';
+  const moodNote=currentMood==='overwhelmed'?'User is overwhelmed today. Give them ONE priority only and push everything else to tomorrow or optional.':(currentMood==='rough'?'User is having a rough day. Keep the plan short and achievable.':'');
+  const overNote=chips.includes('overwhelmed')?'User is feeling overwhelmed. Be gentle.':'';
+  const fullMoodNote2=moodNote||overNote;
   const carryNote=carryover.length?`These were NOT done yesterday, factor them in: ${carryover.join(', ')}.`:'';
   const prompt=`You are Selah, a calm intelligent assistant helping people clear their head and plan their day.
 
 Today is ${now.day}, ${now.date}. Current time is ${now.time}. ${workNote} ${overNote} ${carryNote}
 
-Read the brain dump below and return ONLY a valid JSON object. No markdown, no explanation.
+${fullMoodNote2} Read the brain dump below and return ONLY a valid JSON object. No markdown, no explanation.
 
 Rules:
 - priorities: max 3, most urgent first, short natural language
@@ -764,6 +876,21 @@ function renderOutput(data,now){
     tc.style.display='block';
   }else tc.style.display='none';
   document.getElementById('elseList').textContent=(data.everythingElse||[]).join(' · ')||'Nothing else for now.';
+  // Selah message
+  document.getElementById('selahMessage').textContent=getSelahMessage();
+  // Goals
+  const gol=document.getElementById('goalsOutputList');
+  const gSec=document.getElementById('goalsOutputSection');
+  if(goals.length){
+    gol.innerHTML=goals.map(g=>`<div style="font-size:14px;color:var(--text2);font-weight:400;padding:6px 0;border-bottom:1px solid var(--surface2);">⭐ ${g.text}</div>`).join('');
+    gSec.style.display='block';
+  }
+  // Patterns
+  const pats=analyzePatterns();
+  if(pats&&pats.length){
+    document.getElementById('patternsList').innerHTML=pats.map(p=>`• ${p}`).join('<br>');
+    document.getElementById('patternsSection').style.display='block';
+  }
 }
 
 function addFromOutput(btn,text,bucket){
@@ -1153,6 +1280,139 @@ END:VCALENDAR`;
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');a.href=url;a.download='selah-event.ics';a.click();
   URL.revokeObjectURL(url);
+}
+
+
+// MOOD
+let currentMood='good';
+function checkMood(){
+  const lastMoodDay=ld('selah_last_mood_day');
+  const todayKey=getDayKey(0);
+  if(lastMoodDay!==todayKey)document.getElementById('moodOverlay').style.display='flex';
+}
+function setMood(mood){
+  currentMood=mood;
+  sv('selah_last_mood_day',getDayKey(0));
+  document.getElementById('moodOverlay').style.display='none';
+}
+
+// ACCENT COLOR
+function applyAccent(color){
+  const r=document.documentElement;
+  r.style.setProperty('--gold-light',color);
+  const dim=color+'26';
+  r.style.setProperty('--gold-dim',dim);
+  const darker=color+'CC';
+  r.style.setProperty('--gold',darker);
+  document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));
+}
+function setAccent(color,swId){
+  applyAccent(color);
+  sv('selah_accent',color);
+  if(swId&&swId!=='custom'){
+    const el=document.getElementById('sw-'+swId.replace('sw-',''));
+    if(el)el.classList.add('active');
+  }
+}
+
+// SELAH MESSAGE
+const selahMessages={
+  good:["Looks like a solid day ahead. Start with the small wins.","You have got this. One thing at a time.","Good energy today. Let's make it count."],
+  rough:["Rough day. That is okay. Just do one thing and call it a win.","Keep it simple today. You only need to do what matters most.","One step at a time. That is all."],
+  overwhelmed:["You showed up. That already counts. Start with just one thing.","Breathe. You cannot do everything today and that is okay.","Focus on one. Just one. Everything else can wait."],
+  skip:["Here is what stood out from your dump.","Let's see what today looks like.","Here is your plan."]
+};
+function getSelahMessage(){
+  const msgs=selahMessages[currentMood]||selahMessages.skip;
+  return msgs[Math.floor(Math.random()*msgs.length)];
+}
+
+// PATTERNS
+function analyzePatterns(){
+  if(entries.length<5)return;
+  const allText=entries.map(e=>e.raw).join(' ').toLowerCase();
+  const patterns=[];
+  const checks=[
+    {words:['gym','workout','exercise','run','running'],label:'You mention working out often.'},
+    {words:['call','phone','email','text','message','reply'],label:'You have a lot of communication tasks.'},
+    {words:['sleep','tired','exhausted','rest'],label:'You mention being tired frequently.'},
+    {words:['groceries','food','cook','meal','eat'],label:'Food and meals come up a lot.'},
+    {words:['family','mom','dad','sister','brother'],label:'Family is on your mind often.'},
+  ];
+  checks.forEach(c=>{
+    const count=c.words.reduce((n,w)=>n+(allText.split(w).length-1),0);
+    if(count>=3)patterns.push(c.label);
+  });
+  const completedToday=tasks.filter(t=>t.done&&t.dateKey===getDayKey(0)).length;
+  const totalToday=tasks.filter(t=>t.dateKey===getDayKey(0)).length;
+  if(totalToday>0&&completedToday/totalToday<0.3&&entries.length>7){
+    patterns.push('Tasks tend to carry over. Try doing just one before bed.');
+  }
+  return patterns;
+}
+
+// SHARE OUTPUT
+function shareOutput(){
+  if(!lastResult)return;
+  const now=getNow();
+  const priorities=(lastResult.priorities||[]).slice(0,3).join('\n');
+  const text='My plan for '+now.day+' via Selah\n\n'+priorities+'\n\nFrom overwhelm to clarity';
+  if(navigator.share){
+    navigator.share({title:'My Selah Plan',text}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>alert('Plan copied to clipboard!')).catch(()=>alert(text));
+  }
+}
+
+// QUICK DUMP
+function saveQuickDump(){
+  const box=document.getElementById('quickDumpBox');
+  const txt=box.value.trim();
+  if(!txt)return;
+  const now=getNow();
+  entries.push({date:now.dateKey,raw:'[Quick capture] '+txt,parsed:null});
+  sv('selah_entries',entries);
+  box.value='';
+  document.getElementById('quickDumpOverlay').style.display='none';
+  alert('Saved. Come back tomorrow and Selah will help you sort it out.');
+}
+
+// VOICE
+let recognition=null;let isRecording=false;
+function toggleVoice(){
+  if(!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)){
+    alert('Voice recording is not supported in this browser. Try Chrome.');return;
+  }
+  if(isRecording){recognition.stop();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recognition=new SR();
+  recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';
+  const btn=document.getElementById('voiceBtn');
+  const lbl=document.getElementById('voiceBtnLabel');
+  recognition.onstart=()=>{
+    isRecording=true;
+    lbl.textContent='Listening...';
+    btn.style.background='rgba(239,68,68,0.1)';
+    btn.style.borderColor='rgba(239,68,68,0.4)';
+    btn.style.color='#EF4444';
+  };
+  recognition.onresult=(e)=>{
+    let final='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)final+=e.results[i][0].transcript;
+    }
+    if(final){
+      const box=document.getElementById('dumpBox');
+      box.value+=(box.value?' ':'')+final;
+      box.style.color='var(--text)';
+    }
+  };
+  recognition.onend=()=>{
+    isRecording=false;
+    lbl.textContent='Hold to talk';
+    btn.style.background='';btn.style.borderColor='';btn.style.color='';
+  };
+  recognition.start();
 }
 
 init();
