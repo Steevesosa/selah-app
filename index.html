@@ -632,10 +632,9 @@ Brain dump: ${txt}`;
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({prompt:prompt})
     });
-    const data=await res.json();
-    const data=await res.json();
+    const apiData=await res.json();
     clearInterval(iv);
-    const raw=data.content?.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const raw=apiData.content?.filter(b=>b.type==='text').map(b=>b.text).join('');
     const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
     lastResult=parsed;
     saveEntry(txt,parsed,now);
